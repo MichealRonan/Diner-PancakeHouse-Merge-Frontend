@@ -1,43 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Diner</title>
-    <link href="diner.css" rel="stylesheet"/>
-  </head>
-  <body>
-    <div id="menu" class="container">
-        <h1>Diner Menu</h1>
-    </div>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Menu Application</title>
+  <link href="navbar.css" rel="stylesheet">
+</head>
+<body>
+<nav>
+  <ul>
+    <li><a href="#" onclick="displayMenu('all')">All Menus</a></li>
+    <li><a href="#" onclick="displayMenu('breakfast')">Breakfast</a></li>
+    <li><a href="#" onclick="displayMenu('lunch')">Lunch</a></li>
+    <li><a href="#" onclick="displayMenu('dinner')">Dinner</a></li>
+    <li><a href="#" onclick="displayMenu('vegetarian')">Vegetarian</a></li>
+  </ul>
+</nav>
+<div id="menu" class="container">
+  <h1>Menu Items</h1>
+</div>
 
-    <script>
-      let host = "http://localhost:8080";
-      let menuDiv = document.getElementById("menu");
+<script>
+  let host = "http://localhost:8080/menu";
 
-      displayTheMenu();
-
-      async function getTheMenu() {
-        let response = await fetch(host + "/diner");
-        let menu = await response.json();
-        return menu;
-      }
-
-      async function displayTheMenu() {
-        let menu = await getTheMenu();
-        for (let menuItem of menu) {
-          let div = document.createElement("div");
-          div.class = "menu-item";
-          div.innerHTML = `
-               <div class="menu-item">
-                <div class="item-name">${menuItem.name}</div>
-                <div class="item-description">${menuItem.description}</div>
-                <div class="item-price">${menuItem.price}</div>
-               </div>
-               `;
+  async function displayMenu(menuType) {
+    let url = `${host}/${menuType}`;
+    try {
+      let response = await fetch(url);
+      if (response.ok) {
+        let menuItems = await response.json();
+        let menuDiv = document.getElementById('menu');
+        menuDiv.innerHTML = ''; // Clear existing items
+        menuItems.forEach(item => {
+          let div = document.createElement('div');
+          div.className = 'menu-item';
+          div.innerHTML = `<div class="item-name">${item.name}</div>
+                           <div class="item-description">${item.description}</div>
+                           <div class="item-price">$${item.price}</div>`;
           menuDiv.appendChild(div);
-        }
+        });
+      } else {
+        throw new Error('Failed to fetch items: ' + response.statusText);
       }
-    </script>
-  </body>
+    } catch (error) {
+      console.error(error);
+      document.getElementById('menu').innerHTML = `<p>Error loading menu items. Please check the console for more information.</p>`;
+    }
+  }
+
+  displayMenu('all');
+</script>
+</body>
 </html>
